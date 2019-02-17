@@ -1,0 +1,204 @@
+/* elements */
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 24px;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+@media (min-width: 600px) {
+  html {
+    font-size: 32px;
+  }
+}
+
+body {
+  background: #101030;
+  color: #eee;
+  font-family: Georgia, serif;
+  height: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+.Wrapper {
+  padding: 1rem;
+  position: relative;
+}
+
+/* Header */
+
+.Header {
+  opacity: 0.1;
+}
+
+.Header-title {
+  font-size: 1rem;
+  margin: 0;
+  position: absolute;
+  right: 1rem;
+  top: 0.5rem;
+}
+
+/* Debug */
+
+.Debug {
+  opacity: 0.2;
+}
+
+.Debug-datetime {
+  bottom: 0rem;
+  font-size: 0.5rem;
+  margin: 0;
+  position: absolute;
+  right: 0.5rem;
+}
+
+.Debug-datetimeText {
+  white-space: nowrap;
+}
+
+.Debug-datetimeTextRevealer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  color: #f90;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Content */
+
+.Content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (min-width: 800px) {
+  .Content {
+    flex-direction: row;
+  }
+}
+
+/* Artwork */
+
+.Artwork {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  perspective: 1000px;
+  width: 100%;
+}
+
+@media (min-width: 800px) {
+  .Artwork {
+    flex: 2;
+    margin-top: 0;
+    width: inherit;
+  }
+}
+
+.Artwork-container {
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  /* height: 100%; */
+  max-width: 60vh;
+  position: relative;
+  width: 70%;
+
+  /* animation: slow-move 10s ease-in-out alternate infinite; */
+  box-shadow: 0 0 25px 0 rgba(255,255,255,0.2);
+  transform-style: preserve-3d;
+}
+
+@media (min-width: 800px) {
+  .Artwork-container {
+    max-width: 70vh;
+  }
+}
+
+@keyframes slow-move {
+  0% {
+    transform: rotateX(5deg) rotateY(25deg);
+  }
+
+  100% {
+    transform: rotateX(5deg) rotateY(-25deg);
+  }
+}
+
+.Artwork-container::after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+
+.Artwork-canvas {
+  background-color: #000;
+  position: absolute;
+  height: 100%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+.Artwork-image {
+  background: transparent no-repeat right bottom;
+  background-size: cover;
+  position: absolute;
+  height: 100%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  z-index: 2;
+}
+
+/* Info */
+
+.Info {
+  padding: 0 2rem;
+  text-align: center;
+}
+
+@media (min-width: 800px) {
+  .Info {
+    flex: 1;
+    padding: 2rem;
+    text-align: left;
+  }
+}
+
+/* utility */
+
+.u-willFade {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+
+.u-fadeOut {
+  opacity: 0;
+}
+
+.u-revealer {
+  animation: revealer 4800ms linear infinite;
+}
+
+@keyframes revealer {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}

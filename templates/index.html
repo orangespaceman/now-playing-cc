@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>Now Playing</title>
+    <link rel="stylesheet" href="static/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  </head>
+  <body>
+    <header class="Header">
+      <h1 class="Header-title u-willFade" data-field="player_state"></h1>
+    </header>
+    <main class="Content">
+      <section class="Artwork">
+        <div class="Artwork-container">
+          <div class="Artwork-image u-willFade" data-field="image"></div>
+          <canvas class="Artwork-canvas"></canvas>
+        </div>
+      </section>
+      <aside class="Info">
+        <p class="Info-title">
+          <strong class="u-willFade" data-field="title"></strong>
+        </p>
+        <p class="Info-artist">
+          <span class="u-willFade" data-field="artist"></span>
+        </p>
+        <p class="Info-album">
+          <em class="u-willFade" data-field="album_name"></em>
+        </p>
+      </aside>
+    </main>
+    <footer class="Debug">
+      <div class="Debug-datetime">
+        <p class="Debug-datetimeText u-willFade" data-field="last_updated"></p>
+          <div class="Debug-datetimeTextRevealer">
+          <p class="Debug-datetimeText u-willFade" data-field="last_updated"></p>
+        </div>
+      </div>
+    </footer>
+    <script src="static/fetch.js"></script>
+    <script src="static/particles.js"></script>
+    <script src="static/script.js"></script>
+  </body>
+</html>

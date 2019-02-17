@@ -1,0 +1,12 @@
+{
+  "[python]": {
+    "editor.formatOnSave": true
+  },
+  "python.formatting.provider": "yapf",
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.pep8Enabled": false,
+  "python.pythonPath": "env/bin/python"
+}
