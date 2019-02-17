@@ -1,0 +1,11 @@
+Description=Serve
+
+[Service]
+Environment="FLASK_APP=serve.py"
+ExecStart=/bin/bash -c '/home/pi/now-playing-cc/env/bin/python3 -u /home/pi/now-playing-cc/env/bin/flask run --host=0.0.0.0'
+WorkingDirectory=/home/pi/now-playing-cc
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target

@@ -37,6 +37,22 @@ Start web server
 FLASK_APP=serve.py flask run --host=0.0.0.0
 ```
 
-(The previous two commands could be created as services to start automatically when a Pi turns on)
+The previous two commands could be created as services to start automatically when a Pi turns on:
+
+```
+sudo cp now-playing-cc.service /lib/systemd/system/
+sudo cp serve.service /lib/systemd/system/
+sudo systemctl enable now-playing-cc.service
+sudo systemctl enable serve.service
+```
+
+To manually start/stop these services, run:
+
+```
+sudo service now-playing-cc start
+sudo service now-playing-cc stop
+sudo service now-playing-cc status
+(etc)
+```
 
 Open http://localhost:5000 in a web browser to see it!

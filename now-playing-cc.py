@@ -78,7 +78,7 @@ class NowPlayingCC:
 
         if hasattr(chromecast_data, 'images') and len(chromecast_data.images) > 0:
             image_url = chromecast_data.images[len(chromecast_data.images) - 1].url
-            file_name = f"{image_url.split('/')[-1]}.jpg"
+            file_name = "{}.jpg".format(image_url.split('/')[-1])
             data['image'] = file_name
             self.cache_image(image_url, file_name)
 
@@ -121,7 +121,7 @@ class NowPlayingCC:
         if len(image_url) == 0:
             return
 
-        file_name = f"{image_url.split('/')[-1]}"
+        file_name = "{}".format(image_url.split('/')[-1])
         data['image'] = file_name
         self.cache_image(image_url, file_name)
         self.last_fm_previous_artist_image = data['image']
@@ -133,8 +133,9 @@ class NowPlayingCC:
             data = 'user=bbc6music'
         elif required_data == 'image':
             method = 'artist.getInfo'
-            data = f"mbid={param}"
-        request = f"https://ws.audioscrobbler.com/2.0/?method={method}&{data}&api_key={api_key}&limit=1&format=json"
+            data = "mbid={}".format(param)
+        request = "https://ws.audioscrobbler.com/2.0/?method={}&{}&api_key={}&limit=1&format=json".format(
+            method, data, api_key)
         self.debug("Last FM Request", request)
         try:
             response = requests.get(request)
@@ -144,14 +145,14 @@ class NowPlayingCC:
             self.debug("Requests exception", e)
 
     def cache_image(self, url, file_name):
-        file_path = f"{self.cache_dir}{file_name}"
+        file_path = "{}{}".format(self.cache_dir, file_name)
         if os.path.isfile(file_path):
             return
 
         self.debug('caching image', file_name)
 
         response = requests.get(url, stream=True)
-        with open(f"{self.cache_dir}{file_name}", 'wb') as out_file:
+        with open("{}{}".format(self.cache_dir, file_name), 'wb') as out_file:
             shutil.copyfileobj(response.raw, out_file)
         del response
 
@@ -163,7 +164,7 @@ class NowPlayingCC:
 
     def debug(self, title, message):
         if config.DEBUG:
-            print(f"{title}:\n{message}")
+            print("{}:\n{}".format(title, message))
             print("\n-------\n")
 
 

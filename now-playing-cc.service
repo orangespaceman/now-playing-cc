@@ -1,0 +1,10 @@
+Description=NowPlayingCC
+
+[Service]
+ExecStart=/bin/bash -c '/home/pi/now-playing-cc/env/bin/python3 -u now-playing-cc.py'
+WorkingDirectory=/home/pi/now-playing-cc
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
