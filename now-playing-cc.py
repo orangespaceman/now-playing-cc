@@ -9,16 +9,16 @@ import datetime
 import itertools
 import json
 import os
-import select
 import shutil
 import time
-
-import pychromecast
 import requests
 
+import pychromecast
+from pychromecast.controllers.media import MediaStatusListener
+from pychromecast.controllers.receiver import CastStatusListener
 
-class NowPlayingCC:
 
+class NowPlayingListener():
     data_fields = [
         'title',
         'artist',
@@ -33,34 +33,10 @@ class NowPlayingCC:
     last_fm_previous_artist_image = None
     loop_counter = 0
 
-    def __init__(self):
-        self.init_chromecast()
+    def __init__(self, name, cast):
+        self.name = name
+        self.cast = cast
         self.init_last_fm_api_keys()
-        self.loop()
-
-    def chromecast_callback(self, chromecast):
-        if (config.CHROMECAST and chromecast.name == config.CHROMECAST) or not config.CHROMECAST:
-            self.cast = chromecast
-            self.stop_discovery()
-
-    def init_chromecast(self):
-        self.stop_discovery = pychromecast.get_chromecasts(blocking=False, callback=self.chromecast_callback)
-
-    def loop(self):
-        while True:
-            try:
-                if hasattr(self, 'cast'):
-                    polltime = 0.1
-                    can_read, _, _ = select.select([self.cast.socket_client.get_socket()], [], [], polltime)
-                    if can_read:
-                        self.cast.socket_client.run_once()
-                    self.handle_data()
-                else:
-                    self.debug("Init", "Waiting for cast discovery...")
-                self.loop_counter += 1
-                time.sleep(5)
-            except KeyboardInterrupt:
-                break
 
     def handle_data(self):
         data = {}
@@ -77,7 +53,7 @@ class NowPlayingCC:
                 data[data_field] = getattr(chromecast_data, data_field)
 
         if hasattr(chromecast_data, 'images') and len(chromecast_data.images) > 0:
-            image_url = chromecast_data.images[len(chromecast_data.images) - 1].url
+            image_url = chromecast_data.images[0].url
             file_name = "{}.jpg".format(image_url.split('/')[-1])
             data['image'] = file_name
             self.cache_image(image_url, file_name)
@@ -105,20 +81,24 @@ class NowPlayingCC:
         data['title'] = current_track['recenttracks']['track'][0]['name']
 
         if not artist["mbid"]:
+            self.debug("Last FM image", "No mbid supplied")
             return
 
         if self.last_fm_previous_artist_mbid == artist["mbid"]:
             data['image'] = self.last_fm_previous_artist_image
+            self.debug("Last FM image", "mbid is same as last artist")
             return
 
         self.last_fm_previous_artist_mbid = artist["mbid"]
 
         image = self.request_data_from_lastfm('image', artist["mbid"])
         if 'error' in image or 'artist' not in image or len(image["artist"]["image"]) == 0:
+            self.debug("Last FM image", image)
             return
 
         image_url = image["artist"]["image"][len(image["artist"]["image"]) - 1]["#text"]
         if len(image_url) == 0:
+            self.debug("Last FM image", "image url empty")
             return
 
         file_name = "{}".format(image_url.split('/')[-1])
@@ -136,10 +116,10 @@ class NowPlayingCC:
             data = "mbid={}".format(param)
         request = "https://ws.audioscrobbler.com/2.0/?method={}&{}&api_key={}&limit=1&format=json".format(
             method, data, api_key)
-        self.debug("Last FM Request", request)
+        self.debug("Last FM {} Request".format(required_data), request)
         try:
             response = requests.get(request)
-            self.debug("Last FM Response", response.json())
+            self.debug("Last FM {} Response".format(required_data), response.json())
             return response.json()
         except requests.exceptions.RequestException as e:
             self.debug("Requests exception", e)
@@ -166,6 +146,51 @@ class NowPlayingCC:
         if config.DEBUG:
             print("{}:\n{}".format(title, message))
             print("\n-------\n")
+
+
+class MyCastStatusListener(CastStatusListener, NowPlayingListener):
+    def new_cast_status(self, status):
+        print("[", time.ctime(), " - ", self.name, "] status chromecast change:")
+        print(status)
+        self.handle_data()
+
+
+class MyMediaStatusListener(MediaStatusListener, NowPlayingListener):
+    def new_media_status(self, status):
+        print("[", time.ctime(), " - ", self.name, "] status media change:")
+        print(status)
+        self.handle_data()
+
+    def load_media_failed(self, item, error_code):
+        print("[", time.ctime(), " - ", self.name, item, error_code, "] load media failed:")
+        self.handle_data()
+
+
+class NowPlayingCC:
+    def __init__(self):
+        self.init_chromecast()
+
+    def init_chromecast(self):
+        chromecasts, browser = pychromecast.get_listed_chromecasts(friendly_names=[config.CHROMECAST], )
+
+        if not chromecasts:
+            print(f'No chromecast with name "{config.CHROMECAST}" discovered')
+            sys.exit(1)
+
+        chromecast = chromecasts[0]
+        chromecast.wait()
+
+        print(f'Found chromecast with name "{config.CHROMECAST}"')
+
+        listenerCast = MyCastStatusListener(chromecast.name, chromecast)
+        chromecast.register_status_listener(listenerCast)
+
+        listenerMedia = MyMediaStatusListener(chromecast.name, chromecast)
+        chromecast.media_controller.register_status_listener(listenerMedia)
+
+        input("Listening for Chromecast events...\n\n")
+
+        browser.stop_discovery()
 
 
 np = NowPlayingCC()
