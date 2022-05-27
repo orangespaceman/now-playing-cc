@@ -188,9 +188,10 @@ class NowPlayingCC:
         listenerMedia = MyMediaStatusListener(chromecast.name, chromecast)
         chromecast.media_controller.register_status_listener(listenerMedia)
 
-        input("Listening for Chromecast events...\n\n")
-
         browser.stop_discovery()
+
+        while True:
+            pass
 
 
 np = NowPlayingCC()
