@@ -150,19 +150,19 @@ class NowPlayingListener():
 
 class MyCastStatusListener(CastStatusListener, NowPlayingListener):
     def new_cast_status(self, status):
-        self.debug("[", time.ctime(), " - ", self.name, "] status chromecast change:")
-        self.debug(status)
+        # print("[", time.ctime(), " - ", self.name, "] status chromecast change:")
+        # print(status)
         self.handle_data()
 
 
 class MyMediaStatusListener(MediaStatusListener, NowPlayingListener):
     def new_media_status(self, status):
-        self.debug("[", time.ctime(), " - ", self.name, "] status media change:")
-        self.debug(status)
+        # print("[", time.ctime(), " - ", self.name, "] status media change:")
+        # print(status)
         self.handle_data()
 
     def load_media_failed(self, item, error_code):
-        self.debug("[", time.ctime(), " - ", self.name, item, error_code, "] load media failed:")
+        # print("[", time.ctime(), " - ", self.name, item, error_code, "] load media failed:")
         self.handle_data()
 
 
