@@ -15,7 +15,7 @@ html {
 
 @media (min-width: 600px) {
   html {
-    font-size: 32px;
+    font-size: 42px;
   }
 }
 
@@ -40,11 +40,11 @@ body {
 }
 
 .Header-title {
-  font-size: 1rem;
+  font-size: 0.5rem;
   margin: 0;
   position: absolute;
-  right: 1rem;
-  top: 0.5rem;
+  right: 0.5rem;
+  top: 0.25rem;
 }
 
 /* Debug */
@@ -95,7 +95,7 @@ body {
   align-items: center;
   display: flex;
   justify-content: center;
-  margin-top: 3rem;
+  margin-top: 1.5rem;
   perspective: 1000px;
   width: 100%;
 }
@@ -111,9 +111,9 @@ body {
 .Artwork-container {
   border: 5px solid rgba(255, 255, 255, 0.2);
   /* height: 100%; */
-  max-width: 60vh;
+  max-width: 50vh;
   position: relative;
-  width: 70%;
+  width: 60%;
 
   /* animation: slow-move 10s ease-in-out alternate infinite; */
   box-shadow: 0 0 25px 0 rgba(255,255,255,0.2);
@@ -122,7 +122,7 @@ body {
 
 @media (min-width: 800px) {
   .Artwork-container {
-    max-width: 70vh;
+    max-width: 60vh;
   }
 }
 
@@ -166,16 +166,28 @@ body {
 /* Info */
 
 .Info {
-  padding: 0 2rem;
+  padding: 0 1.5rem;
   text-align: center;
 }
+
 
 @media (min-width: 800px) {
   .Info {
     flex: 1;
-    padding: 2rem;
+    padding: 1.5rem;
     text-align: left;
   }
+}
+
+.Info-label {
+  display: block;
+  font-size: 50%;
+}
+
+.Info-title,
+.Info-artist,
+.Info-album {
+  margin: 0.5rem 0;
 }
 
 /* utility */
