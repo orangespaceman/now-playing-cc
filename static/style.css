@@ -15,7 +15,7 @@ html {
 
 @media (min-width: 600px) {
   html {
-    font-size: 42px;
+    font-size: 38px;
   }
 }
 
@@ -186,7 +186,9 @@ body {
 
 .Info-title,
 .Info-artist,
-.Info-album {
+.Info-album,
+.Info-release,
+.Info-playlist {
   margin: 0.5rem 0;
 }
 

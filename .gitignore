@@ -22,3 +22,6 @@ config.py
 
 # data
 data.json
+
+# cache
+.cache

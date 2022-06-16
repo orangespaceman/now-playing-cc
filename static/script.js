@@ -14,6 +14,8 @@
     updateTitle(data.title);
     updateArtist(data.artist);
     updateAlbum(data.album_name);
+    updateReleaseDate(data.release_date);
+    updatePlaylist(data.playlist, data.album_name);
     updateDatetime(data.last_updated);
     updateState(data);
     updateArtwork(data);
@@ -33,6 +35,26 @@
     updateFieldValue('album_name', album_name);
   }
 
+  function updateReleaseDate(release_date) {
+    const el = document.querySelector('.Info-release');
+    if (!release_date) {
+      el.classList.add('u-fadeOut');
+    } else {
+      el.classList.remove('u-fadeOut');
+      updateFieldValue('release_date', release_date);
+    }
+  }
+
+  function updatePlaylist(playlist, album_name) {
+    const el = document.querySelector('.Info-playlist');
+    if (playlist === album_name) {
+      el.classList.add('u-fadeOut');
+    } else {
+      el.classList.remove('u-fadeOut');
+      updateFieldValue('playlist', playlist);
+    }
+  }
+
   function updateDatetime(last_updated) {
     updateFieldValue('last_updated', last_updated);
     const el = document.querySelector('.Debug-datetimeTextRevealer');
@@ -43,8 +65,13 @@
   }
 
   function updateState(data) {
-    data.player_state = (data.player_state === 'PLAYING') ? 'Now playing' : 'Not playing';
     updateFieldValue('player_state', data.player_state);
+    const el = document.querySelector('.Info');
+    if (data.player_state === 'PLAYING') {
+      el.classList.remove('u-fadeOut');
+    } else {
+      el.classList.add('u-fadeOut');
+    }
   }
 
   function updateArtwork(data) {
@@ -91,7 +118,6 @@
     el.classList.remove('u-fadeOut');
     particles.stop();
   }
-
 
   function handleError(e) {
     console.log('ERROR', e);

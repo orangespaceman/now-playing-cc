@@ -4,6 +4,7 @@ isort==4.3.4
 pip-tools==3.3.2
 pre-commit==1.14.3
 PyChromecast==12.1.2
-requests==2.21.0
+requests==2.25.0
 seed-isort-config==1.5.0
+spotipy==2.19.0
 yapf==0.26.0
