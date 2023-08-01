@@ -67,7 +67,7 @@
   function updateState(data) {
     updateFieldValue('player_state', data.player_state);
     const el = document.querySelector('.Info');
-    if (data.player_state === 'PLAYING') {
+    if (data.player_state === 'PLAYING' || data.player_state === 'BUFFERING') {
       el.classList.remove('u-fadeOut');
     } else {
       el.classList.add('u-fadeOut');
