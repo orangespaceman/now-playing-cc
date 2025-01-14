@@ -13,7 +13,7 @@ html {
   width: 100%;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 767px) {
   html {
     font-size: 36px;
   }
