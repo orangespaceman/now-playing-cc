@@ -7,15 +7,15 @@
 }
 
 html {
-  font-size: 24px;
+  font-size: 20px;
   height: 100%;
-  width: 100%;
   pointer-events: none;
+  width: 100%;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 700px) {
   html {
-    font-size: 38px;
+    font-size: 36px;
   }
 }
 
@@ -40,10 +40,10 @@ body {
 }
 
 .Header-title {
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   margin: 0;
   position: absolute;
-  right: 0.5rem;
+  left: 0.5rem;
   top: 0.25rem;
 }
 
@@ -55,10 +55,10 @@ body {
 
 .Debug-datetime {
   bottom: 0rem;
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   margin: 0;
   position: absolute;
-  right: 0.5rem;
+  left: 0.5rem;
 }
 
 .Debug-datetimeText {
@@ -83,7 +83,7 @@ body {
   height: 100%;
 }
 
-@media (min-width: 800px) {
+@media (orientation: landscape) {
   .Content {
     flex-direction: row;
   }
@@ -94,6 +94,7 @@ body {
 .Artwork {
   align-items: center;
   display: flex;
+  flex: 1;
   justify-content: center;
   margin-top: 1.5rem;
   perspective: 1000px;
@@ -166,6 +167,7 @@ body {
 /* Info */
 
 .Info {
+  flex: 1;
   padding: 0 1.5rem;
   text-align: center;
 }
@@ -173,7 +175,6 @@ body {
 
 @media (min-width: 800px) {
   .Info {
-    flex: 1;
     padding: 1.5rem;
     text-align: left;
   }
