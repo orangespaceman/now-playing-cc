@@ -13,6 +13,12 @@ Create a virtualenv:
 virtualenv env --python=/path/to/python3
 ```
 
+or
+
+```
+python -m venv env
+```
+
 Activate virtualenv:
 
 ```
