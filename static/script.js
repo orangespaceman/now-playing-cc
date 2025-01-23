@@ -17,6 +17,7 @@
     updateReleaseDate(data.release_date);
     updatePlaylist(data.playlist, data.album_name);
     updateDatetime(data.last_updated);
+    updateIp(data.ip);
     updateState(data);
     updateArtwork(data);
 
@@ -33,6 +34,10 @@
 
   function updateAlbum(album_name) {
     updateFieldValue('album_name', album_name);
+  }
+
+  function updateIp(ip) {
+    updateFieldValue('ip', ip);
   }
 
   function updateReleaseDate(release_date) {
