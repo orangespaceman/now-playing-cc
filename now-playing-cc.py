@@ -39,7 +39,6 @@ class NowPlayingListener:
     def __init__(self, name, cast):
         self.name = name
         self.cast = cast
-        self.init_last_fm_api_keys()
 
     def handle_data(self):
         refresh_manually = False
@@ -131,45 +130,36 @@ class NowPlayingListener:
             except Exception as e:
                 self.debug("Spotify API exception", e)
 
-    def init_last_fm_api_keys(self):
-        self.last_fm_api_keys = itertools.cycle(config.LAST_FM_API_KEYS)
-
     def check_6music_state(self, data):
         self.debug("checking 6music state!", "-")
 
-        current_track = self.request_6music_data_from_lastfm("track")
+        current_track = self.request_6music_data()
 
         if (
             current_track is None
             or "error" in current_track
-            or "recenttracks" not in current_track
+            or "data" not in current_track
         ):
             self.debug("no current 6music track!", "-")
             return
 
-        data["playlist"] = data["title"]
-        data["album_name"] = current_track["recenttracks"]["track"][0]["album"]["#text"]
-        data["artist"] = current_track["recenttracks"]["track"][0]["artist"]["#text"]
-        data["title"] = current_track["recenttracks"]["track"][0]["name"]
+        image_url = current_track["data"][0]["image_url"].replace("{recipe}", "640x640")
+        file_name = "{}.jpg".format(image_url.split("/")[-1])
+        data["image"] = file_name
+        self.cache_image(image_url, file_name)
 
-    def request_6music_data_from_lastfm(self, required_data, param=None):
-        api_key = next(self.last_fm_api_keys)
-        if required_data == "track":
-            method = "user.getRecentTracks"
-            data = "user=bbc6music"
-        elif required_data == "album":
-            method = "album.getInfo"
-            data = param
-        elif required_data == "image":
-            method = "artist.getInfo"
-            data = "mbid={}".format(param)
-        request = "https://ws.audioscrobbler.com/2.0/?method={}&{}&api_key={}&limit=1&format=json".format(
-            method, data, api_key
+        data["playlist"] = data["title"]
+        data["album_name"] = ""
+        data["artist"] = current_track["data"][0]["titles"]["primary"]
+        data["title"] = current_track["data"][0]["titles"]["secondary"]
+
+    def request_6music_data(self):
+        request = (
+            "https://rms.api.bbc.co.uk/v2/services/bbc_6music/segments/latest?limit=1"
         )
-        self.debug("Last FM {} Request".format(required_data), request)
         try:
             response = requests.get(request)
-            self.debug("Last FM {} Response".format(required_data), response.json())
+            self.debug("6music response", response.json())
             return response.json()
         except requests.exceptions.RequestException as e:
             self.debug("Requests exception", e)
