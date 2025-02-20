@@ -42,19 +42,30 @@ class NowPlayingListener:
         self.init_last_fm_api_keys()
 
     def handle_data(self):
+        refresh_manually = False
         data = {}
         self.update_data(data, self.cast.status)
         self.update_data(data, self.cast.media_controller.status)
-        if (
-            hasattr(self.cast.media_controller.status, "player_state")
-            and self.cast.media_controller.status.player_state == "PLAYING"
-        ):
-            self.check_6music_state(data)
+
+        if hasattr(
+            self.cast.media_controller.status, "player_state"
+        ) and self.cast.media_controller.status.player_state in [
+            "PLAYING",
+            "BUFFERING",
+        ]:
+            if "Radio 6 Music" in [data["playlist"], data["title"]]:
+                self.check_6music_state(data)
+                refresh_manually = True
+            elif "FIP" in [data["title"], data["playlist"]]:
+                self.check_fip_state(data)
+                refresh_manually = True
+
         self.request_release_date(data, self.cast.media_controller.status)
         self.update_json(data)
 
-        if "Radio 6 Music" in data["title"]:
-            time.sleep(30)
+        if refresh_manually:
+            self.debug("manually refreshing", "-")
+            time.sleep(60)
             self.handle_data()
 
     def update_data(self, data, chromecast_data):
@@ -83,20 +94,57 @@ class NowPlayingListener:
         else:
             data["playlist"] = None
 
+    def request_release_date(self, data, chromecast_data):
+        if data["title"] == "" or data["artist"] == "" or data["album_name"] == "":
+            return
+
+        if (
+            hasattr(chromecast_data, "content_id")
+            and chromecast_data.content_id
+            and "spotify:track:" in chromecast_data.content_id
+        ):
+            try:
+                sp = spotipy.Spotify(
+                    auth_manager=SpotifyClientCredentials(
+                        client_id=config.SPOTIFY_CLIENT_ID,
+                        client_secret=config.SPOTIFY_CLIENT_SECRET,
+                    )
+                )
+
+                track = sp.track(chromecast_data.content_id)
+                if self.has_key_deep(track, "album", "release_date"):
+                    try:
+                        date_string = track["album"]["release_date"]
+                        date_precision = track["album"]["release_date_precision"]
+                        if date_precision == "year":
+                            data["release_date"] = date_string
+                        elif date_precision == "month":
+                            date_obj = datetime.datetime.strptime(date_string, "%Y-%m")
+                            data["release_date"] = date_obj.strftime("%B %Y")
+                        else:
+                            date_obj = datetime.datetime.strptime(
+                                date_string, "%Y-%m-%d"
+                            )
+                            data["release_date"] = date_obj.strftime("%-d %B %Y")
+                    except Exception as e:
+                        self.debug("Date exception", e)
+            except Exception as e:
+                self.debug("Spotify API exception", e)
+
     def init_last_fm_api_keys(self):
         self.last_fm_api_keys = itertools.cycle(config.LAST_FM_API_KEYS)
 
     def check_6music_state(self, data):
-        if "Radio 6 Music" not in data["title"]:
-            return
+        self.debug("checking 6music state!", "-")
 
-        current_track = self.request_data_from_lastfm("track")
+        current_track = self.request_6music_data_from_lastfm("track")
 
         if (
             current_track is None
             or "error" in current_track
             or "recenttracks" not in current_track
         ):
+            self.debug("no current 6music track!", "-")
             return
 
         data["playlist"] = data["title"]
@@ -104,38 +152,7 @@ class NowPlayingListener:
         data["artist"] = current_track["recenttracks"]["track"][0]["artist"]["#text"]
         data["title"] = current_track["recenttracks"]["track"][0]["name"]
 
-    def request_release_date(self, data, chromecast_data):
-        if data["title"] == "" or data["artist"] == "" or data["album_name"] == "":
-            return
-
-        if (
-            hasattr(chromecast_data, "content_id")
-            and "spotify:track:" in chromecast_data.content_id
-        ):
-            sp = spotipy.Spotify(
-                auth_manager=SpotifyClientCredentials(
-                    client_id=config.SPOTIFY_CLIENT_ID,
-                    client_secret=config.SPOTIFY_CLIENT_SECRET,
-                )
-            )
-
-            track = sp.track(chromecast_data.content_id)
-            if self.has_key_deep(track, "album", "release_date"):
-                try:
-                    date_string = track["album"]["release_date"]
-                    date_precision = track["album"]["release_date_precision"]
-                    if date_precision == "year":
-                        data["release_date"] = date_string
-                    elif date_precision == "month":
-                        date_obj = datetime.datetime.strptime(date_string, "%Y-%m")
-                        data["release_date"] = date_obj.strftime("%B %Y")
-                    else:
-                        date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
-                        data["release_date"] = date_obj.strftime("%-d %B %Y")
-                except Exception as e:
-                    self.debug("Date exception", e)
-
-    def request_data_from_lastfm(self, required_data, param=None):
+    def request_6music_data_from_lastfm(self, required_data, param=None):
         api_key = next(self.last_fm_api_keys)
         if required_data == "track":
             method = "user.getRecentTracks"
@@ -153,6 +170,39 @@ class NowPlayingListener:
         try:
             response = requests.get(request)
             self.debug("Last FM {} Response".format(required_data), response.json())
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.debug("Requests exception", e)
+
+    def check_fip_state(self, data):
+        self.debug("checking fip state!", "-")
+
+        current_track = self.request_fip_data()
+
+        if (
+            current_track is None
+            or "error" in current_track
+            or "now" not in current_track
+        ):
+            self.debug("no current fip track!", "-")
+            return
+
+        image_url = current_track["now"]["visuals"]["card"]["src"]
+        file_name = "{}.jpg".format(image_url.split("/")[-1])
+        data["image"] = file_name
+        self.cache_image(image_url, file_name)
+
+        data["playlist"] = data["title"]
+        data["album_name"] = current_track["now"]["song"]["release"]["title"]
+        data["release_date"] = current_track["now"]["song"]["year"]
+        data["artist"] = current_track["now"]["secondLine"]["title"]
+        data["title"] = current_track["now"]["firstLine"]["title"]
+
+    def request_fip_data(self):
+        request = "https://www.radiofrance.fr/fip/api/live"
+        try:
+            response = requests.get(request)
+            self.debug("Fip response", response.json())
             return response.json()
         except requests.exceptions.RequestException as e:
             self.debug("Requests exception", e)
@@ -208,10 +258,16 @@ class MyCastStatusListener(CastStatusListener, NowPlayingListener):
 
 class MyMediaStatusListener(MediaStatusListener, NowPlayingListener):
     def new_media_status(self, status):
-        self.handle_data()
+        try:
+            self.handle_data()
+        except Exception as e:
+            self.debug("Exception in media status callback", e)
 
     def load_media_failed(self, item, error_code):
-        self.handle_data()
+        try:
+            self.handle_data()
+        except Exception as e:
+            self.debug("Exception in media load failure", e)
 
 
 class NowPlayingCC:
