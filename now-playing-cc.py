@@ -58,7 +58,9 @@ class NowPlayingListener:
             ):
                 self.check_6music_state(data)
                 refresh_manually = True
-            elif "FIP" in [data["title"], data["playlist"]]:
+            elif "FIP" in [data["title"], data["playlist"]] or (
+                "Radio France" in self.cast.status.display_name
+            ):
                 self.check_fip_state(data)
                 refresh_manually = True
 
