@@ -187,7 +187,7 @@ class NowPlayingListener:
         data["image"] = file_name
         self.cache_image(image_url, file_name)
 
-        data["playlist"] = data["title"]
+        data["playlist"] = data["title"] if data["title"] is not None else "FIP"
         data["album_name"] = current_track["now"]["song"]["release"]["title"]
         data["release_date"] = current_track["now"]["song"]["year"]
         data["artist"] = current_track["now"]["secondLine"]["title"]
