@@ -52,7 +52,10 @@ class NowPlayingListener:
             "PLAYING",
             "BUFFERING",
         ]:
-            if "Radio 6 Music" in [data["playlist"], data["title"]]:
+            if any(
+                station in ["Radio 6 Music", "BBC Radio 6 Music"]
+                for station in [data["playlist"], data["title"]]
+            ):
                 self.check_6music_state(data)
                 refresh_manually = True
             elif "FIP" in [data["title"], data["playlist"]]:
