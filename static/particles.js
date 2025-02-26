@@ -121,7 +121,11 @@ var particles = function() {
   }
 
   function restart () {
-    isRunning = true;
+    if (!isRunning) {
+      particles = [];
+      createParticles();
+      isRunning = true;
+    }
   }
 
   // go!
